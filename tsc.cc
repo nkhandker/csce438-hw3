@@ -117,14 +117,14 @@ int Client::connectTo()
 	// does this need to retry on fail?
   std::cout << "code set" << std::endl;
 
-	Status stat = stub_->Request_Avail_Server(&my_context, pong, &ip_info);
+	Status stat = r_stub_->Request_Avail_Server(&my_context, pong, &ip_info);
   std::cout << "request didnt crash" << std::endl;
 
   if(stat.ok()){
-    std::cout << "got availible server" << std::endl;
+    std::cout << "found availible server" << std::endl;
   }
   else{
-    std::cout << "get fucked m8" << std::endl;
+    std::cout << "avalible server not found" << std::endl;
   }
 
 	servername = ip_info.ip();

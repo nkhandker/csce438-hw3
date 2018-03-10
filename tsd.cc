@@ -385,7 +385,8 @@ class SNSServiceImpl final : public SNSService::Service {
   /* Client <---> Router */
   Status Request_Avail_Server(ServerContext* context, const Ping* pong, Ip_info* ip) override {
 	  ip_ms_p* a = available.get_avail_server();
-	  ip->set_ip(a->ip);
+    std::cout << "Found master server " << a->ip << " on port " << a->m_port << std::endl;
+    ip->set_ip(a->ip);
 	  ip->set_port(a->m_port);
 	  return Status::OK;
   }
@@ -498,7 +499,7 @@ void RunServer(std::string ip_addr,std::string port_no, char type) {
 		// TODO: add cases for unavailable Router ie loop until router is avail
 		Status stat = stub_to_r->Register_Pair(&context, my_info, &pong);
 		if(stat.ok()){
-                 std::cout << "Connected" << std::endl; 
+                 std::cout << "Connected" << std::endl;
                 }
                 // Check status then break
 		break;
