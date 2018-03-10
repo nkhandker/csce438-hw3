@@ -52,9 +52,9 @@
 #include "sns.grpc.pb.h"
 
 
-// STILL TODO: 
+// STILL TODO:
 // - implement data persistence (i.e. write lists and timeline to file) [all HW2 stuff]
-// - implement lists backup/retrieval to/from router 
+// - implement lists backup/retrieval to/from router
 
 #include "avail_queue.h"
 
@@ -156,7 +156,7 @@ int Client::loadLists() {
 	std::ifstream temp_i;
 	std::string filename = username + "_followers_list.txt";
 	std::string readline = "";
-	
+
 	std::vector<Client*> followers;
 	std::vector<Client*> following;
 
@@ -178,7 +178,7 @@ int Client::loadLists() {
 	client_following=following;
 }
 
-class SNSServiceImpl final : public SNSService::Service {  
+class SNSServiceImpl final : public SNSService::Service {
 
   /* Client <---> Master */
   Status List(ServerContext* context, const Request* request, ListReply* list_reply) override {
@@ -240,7 +240,7 @@ class SNSServiceImpl final : public SNSService::Service {
     }
     return Status::OK;
   }
-  
+
   Status Login(ServerContext* context, const Request* request, Reply* reply) override {
     Client c;
     std::string username = request->username();
@@ -250,7 +250,7 @@ class SNSServiceImpl final : public SNSService::Service {
       client_db.push_back(c);
       reply->set_msg("Login Successful!");
     }
-    else{ 
+    else{
       Client *user = &client_db[user_index];
       if(user->connected)
         reply->set_msg("Invalid Username");
@@ -265,7 +265,7 @@ class SNSServiceImpl final : public SNSService::Service {
     return Status::OK;
   }
 
-  Status Timeline(ServerContext* context, 
+  Status Timeline(ServerContext* context,
 		ServerReaderWriter<Message, Message>* stream) override {
     Message message;
     Client *c;
@@ -273,7 +273,7 @@ class SNSServiceImpl final : public SNSService::Service {
       std::string username = message.username();
       int user_index = find_user(username);
       c = &client_db[user_index];
- 
+
       //Write the current message to "username.txt"
       std::string filename = username+".txt";
       std::ofstream user_file(filename,std::ios::app|std::ios::out|std::ios::in);
@@ -301,12 +301,12 @@ class SNSServiceImpl final : public SNSService::Service {
           }
           newest_twenty.push_back(line);
         }
-        Message new_msg; 
+        Message new_msg;
  	//Send the newest messages to the client to be displayed
 	for(int i = 0; i<newest_twenty.size(); i++){
 	  new_msg.set_msg(newest_twenty[i]);
           stream->Write(new_msg);
-        }    
+        }
         continue;
       }
       //Send the message to each follower's stream
@@ -330,10 +330,10 @@ class SNSServiceImpl final : public SNSService::Service {
     return Status::OK;
   }
 
-  
-  
+
+
   /* Master <---> Router */
-  Status Register_Pair(ServerContext* context, const MS_Ip_info* ms_ip, Ping* pong) override { 
+  Status Register_Pair(ServerContext* context, const MS_Ip_info* ms_ip, Ping* pong) override {
 	  available.enqueue(ip_ms_p(ms_ip->ip(),ms_ip->m_port(), ms_ip->s_port()));
 	  pong->set_code(0);
 	  return Status::OK;
@@ -341,13 +341,13 @@ class SNSServiceImpl final : public SNSService::Service {
   // TODO: add update_router_userlists() to functions
 
   /* Router <---> Master */
-  Status Are_You_There/*?*/(ServerContext* context, const Ping* pin, Ping* pong) override { 
+  Status Are_You_There/*?*/(ServerContext* context, const Ping* pin, Ping* pong) override {
 	  pong->set_code(0);
 	  return Status::OK;
   }
 
   /* Router <---> Slave  */
-  Status Promote_S_to_M(ServerContext* context, const Ping* pin, Ping* pong) override { 
+  Status Promote_S_to_M(ServerContext* context, const Ping* pin, Ping* pong) override {
 	  pong->set_code(0);
 
 	  my_type = 'M';
@@ -443,7 +443,7 @@ class SNSServiceImpl final : public SNSService::Service {
 		  Status stat = master_stub->Follow(&context1, *request, &reply1);
 	  }
 	  reply->set_msg("Follows pushed");
-	  
+
 	  return Status::OK;
   }
 
@@ -498,7 +498,7 @@ void RunServer(std::string ip_addr,std::string port_no, char type) {
 		// TODO: add cases for unavailable Router ie loop until router is avail
 		Status stat = stub_to_r->Register_Pair(&context, my_info, &pong);
 		if(stat.ok()){
-                 std::cout << "fucking shit is connected" << std::endl; 
+                 std::cout << "Connected" << std::endl; 
                 }
                 // Check status then break
 		break;
@@ -511,7 +511,7 @@ void RunServer(std::string ip_addr,std::string port_no, char type) {
 	default:
 		break;
   }
-  
+
   server->Wait();
 }
 
@@ -520,9 +520,9 @@ int main(int argc, char** argv) {
   // ip_addr may need to be a global variable
   my_ip_addr = "127.0.1.1";
   my_port = "3010";
-  
+
   my_type = 'S';
-  
+
   int opt = 0;
   while ((opt = getopt(argc, argv, "i:p:t:r:x:")) != -1){
     switch(opt) {
@@ -532,9 +532,9 @@ int main(int argc, char** argv) {
                   my_port = optarg; break;
 	  case 't':
 		  my_type = optarg[0]; break;
-          case 'r': 
+          case 'r':
 		  router_ip = optarg; break;
-          case 'x': 
+          case 'x':
 		  router_port = optarg; break;
       default:
 	  std::cerr << "Invalid Command Line Argument\n";

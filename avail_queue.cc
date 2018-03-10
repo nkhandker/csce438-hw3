@@ -32,6 +32,7 @@ void avail_queue::enqueue(ip_ms_p server) {
 		}
 	}
 	server_pairs.push_back(server);
+	std::cout << "server pushed back" << std::endl;
 }
 
 void avail_queue::next() {
